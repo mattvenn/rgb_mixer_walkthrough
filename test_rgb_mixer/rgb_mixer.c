@@ -15,10 +15,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// This include is relative to $CARAVEL_PATH (see Makefile)
 #include <defs.h>
 #include <stub.c>
 
-// change to your project's ID - ask Matt
+/*
+	IO Test:
+		- Configures MPRJ lower 8-IO pins as outputs
+		- Observes counter value through the MPRJ lower 8 IO pins (in the testbench)
+*/
 #define PROJECT_ID 0
 
 void main()
@@ -39,30 +44,56 @@ void main()
 
 	*/
 
-    // 2 inputs
-	reg_mprj_io_8 =   GPIO_MODE_USER_STD_INPUT_NOPULL;
-	reg_mprj_io_9 =   GPIO_MODE_USER_STD_INPUT_NOPULL;
+	/* Set up the housekeeping SPI to be connected internally so	*/
+	/* that external pin changes don't affect it.			*/
 
-    // 2 outputs
+	// reg_spi_enable = 1;
+	// reg_spimaster_cs = 0x10001;
+	// reg_spimaster_control = 0x0801;
+
+	// reg_spimaster_control = 0xa002;	// Enable, prescaler = 2,
+                                        // connect to housekeeping SPI
+
+	// Connect the housekeeping SPI to the SPI master
+	// so that the CSB line is not left floating.  This allows
+	// all of the GPIO pins to be used for user functions.
+
+	// Configure lower 8-IOs as user output
+	// Observe counter value in the testbench
+	reg_mprj_io_8  =  GPIO_MODE_USER_STD_INPUT_NOPULL;
+	reg_mprj_io_9  =  GPIO_MODE_USER_STD_INPUT_NOPULL;
+
+	reg_mprj_io_10 =  GPIO_MODE_USER_STD_INPUT_NOPULL;
+	reg_mprj_io_11 =  GPIO_MODE_USER_STD_INPUT_NOPULL;
+
+	reg_mprj_io_12 =  GPIO_MODE_USER_STD_INPUT_NOPULL;
+	reg_mprj_io_13 =  GPIO_MODE_USER_STD_INPUT_NOPULL;
+
 	reg_mprj_io_14 =  GPIO_MODE_USER_STD_OUTPUT;
 	reg_mprj_io_15 =  GPIO_MODE_USER_STD_OUTPUT;
+	reg_mprj_io_16 =  GPIO_MODE_USER_STD_OUTPUT;
 
-    /* Apply configuration */
-    reg_mprj_xfer = 1;
-    while (reg_mprj_xfer == 1);
+    // sync
+	reg_mprj_io_17 =  GPIO_MODE_USER_STD_OUTPUT;
 
-    // activate the project by setting the 0th bit of 1st bank of LA
-    reg_la0_iena = 0; // input enable off
-    reg_la0_oenb = 1; // enable logic analyser output (ignore the name, 1 is on, 0 off)
-    reg_la0_data |= (1 << PROJECT_ID); // enable the project
+	/* Apply configuration */
+	reg_mprj_xfer = 1;
+	while (reg_mprj_xfer == 1);
 
-    // reset design with 0bit of 2nd bank of LA
+    //activate the design
+    reg_la0_iena = 0; // input disabled
+    reg_la0_oenb = 1; // output enabled
+    reg_la0_data = 1 << PROJECT_ID;
+
+    // reset the design with LA
     reg_la1_oenb = 1; // enable
     reg_la1_iena = 0;
+    // reset
     reg_la1_data = 1;
     reg_la1_data = 0;
 
-    // no need for anything else as this design is free running.
+    // do nothing
+
 
 }
 

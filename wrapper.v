@@ -11,7 +11,7 @@
 //`define USE_IRQ 1
 
 // update this to the name of your module
-module wrapped_project(
+module wrapped_rgb_mixer(
 `ifdef USE_POWER_PINS
     inout vccd1,	// User area 1 1.8V supply
     inout vssd1,	// User area 1 digital ground
@@ -151,6 +151,28 @@ module wrapped_project(
     // Instantiate your module here, 
     // connecting what you need of the above signals. 
     // Use the buffered outputs for your module's outputs.
+    rgb_mixer rgb_mixer (
+    `ifdef USE_POWER_PINS
+        .vccd1(vccd1),	// User area 1 1.8V power
+        .vssd1(vssd1),	// User area 1 digital ground
+    `endif
+
+        .clk(wb_clk_i),
+        .reset(la1_data_in[0]),
+
+        // IO Pads
+        .enc0_a(io_in[ 8]),
+        .enc0_b(io_in[ 9]),
+        .enc1_a(io_in[10]),
+        .enc1_b(io_in[11]),
+        .enc2_a(io_in[12]),
+        .enc2_b(io_in[13]),
+        .pwm0_out(buf_io_out[14]),
+        .pwm1_out(buf_io_out[15]),
+        .pwm2_out(buf_io_out[16]),
+        .sync(buf_io_out[17])
+
+    );
 
 endmodule 
 `default_nettype wire
